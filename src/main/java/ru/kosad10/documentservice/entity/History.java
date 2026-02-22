@@ -1,11 +1,19 @@
 package ru.kosad10.documentservice.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.kosad10.documentservice.enums.Action;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class History {
     @Id
     @GeneratedValue(
