@@ -44,3 +44,9 @@ databaseChangeLog:
                   type: DATE
                   constraints:
                     nullable: false
+
+        - createSequence:
+            sequenceName: documents_id_seq
+            startValue: 1
+            incrementBy: 1
+            minValue: 1

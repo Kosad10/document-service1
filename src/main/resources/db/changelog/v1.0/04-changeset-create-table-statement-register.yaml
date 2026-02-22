@@ -23,3 +23,9 @@ databaseChangeLog:
             referencedTableName: documents
             referencedColumnNames: id
             constraintName: fk_documents_statement_register
+
+        - createSequence:
+            sequenceName: statement_register_id_seq
+            startValue: 1
+            incrementBy: 1
+            minValue: 1
