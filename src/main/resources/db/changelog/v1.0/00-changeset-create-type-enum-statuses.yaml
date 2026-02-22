@@ -2,6 +2,12 @@ databaseChangeLog:
   - changeSet:
       id: 00-create-document-status-enum
       author: Kosolapova A.
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - sqlCheck:
+                expectedResult: 1
+                sql: "SELECT count(*) FROM pg_type WHERE typname = 'document_status'"
       changes:
         - sql:
             sql: |

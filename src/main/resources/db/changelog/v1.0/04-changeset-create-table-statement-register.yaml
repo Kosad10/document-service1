@@ -17,11 +17,6 @@ databaseChangeLog:
                   type: BIGINT
                   constraints:
                     nullable: false
-              - column:
-                  name: record_created
-                  type: BOOLEAN
-                  constraints:
-                    nullable: false
         - addForeignKeyConstraint:
             baseTableName: statement_register
             baseColumnNames: document_id

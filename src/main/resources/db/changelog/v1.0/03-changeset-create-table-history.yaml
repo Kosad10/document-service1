@@ -30,7 +30,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: action
-                  type: actions_for_document
+                  type: actions
               - column:
                   name: comment
                   type: VARCHAR(50)

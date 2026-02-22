@@ -2,6 +2,12 @@ databaseChangeLog:
   - changeSet:
       id: 01-changeset-create-type-enum-actions.yaml
       author: Kosolapova A.
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - sqlCheck:
+                expectedResult: 1
+                sql: "SELECT count(*) FROM pg_type WHERE typname = 'actions'"
       changes:
         - sql:
             sql: |
