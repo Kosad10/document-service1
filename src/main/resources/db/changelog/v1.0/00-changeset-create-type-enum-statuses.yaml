@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 00-create-document-status-enum
+      author: Kosolapova A.
+      changes:
+        - sql:
+            sql: |
+              CREATE TYPE document_status AS ENUM (
+                'DRAFT',
+                'SUBMITTED',
+                'APPROVED'
+              );

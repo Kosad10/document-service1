@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  liquibase:
+    change-log:
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/mydatabase
+    password: qwerty1234
+    username: user
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-changeset-create-type-enum-actions.yaml
+      author: Kosolapova A.
+      changes:
+        - sql:
+            sql: |
+              CREATE TYPE actions AS ENUM (
+                 'SUBMIT',
+                 'APPROVE'
+              )

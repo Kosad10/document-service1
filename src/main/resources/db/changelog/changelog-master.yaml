@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - include:
+      file: v1/0/00-changeset-create-type-enum-statuses.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: v1/0/01-changeset-create-type-enum-actions.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: v1/0/02-changeset-create-table-documents.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: v1/0/03-changeset-create-table-history.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: v1/0/04-changeset-create-table-statement-register.yaml
+      relativeToChangelogFile: true
