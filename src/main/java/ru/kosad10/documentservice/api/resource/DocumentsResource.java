@@ -9,7 +9,7 @@ import ru.kosad10.documentservice.api.model.DocumentWithStatusAndDate;
 import ru.kosad10.documentservice.api.model.DocumentsFilter;
 
 import java.util.Collection;
-r
+
 public interface DocumentsResource {
 
     @GetMapping("/api/v1/document/{documentId}")
