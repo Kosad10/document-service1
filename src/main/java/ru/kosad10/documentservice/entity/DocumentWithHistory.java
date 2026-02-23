@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class History {
+public class DocumentWithHistory {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

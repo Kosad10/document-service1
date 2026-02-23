@@ -1,23 +1,26 @@
 package ru.kosad10.documentservice.api.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.kosad10.documentservice.api.model.DocumentDTO;
-import ru.kosad10.documentservice.api.model.DocumentWithHistory;
+import ru.kosad10.documentservice.api.model.DocumentWithHistoryDTO;
 import ru.kosad10.documentservice.api.model.DocumentWithStatusAndDate;
 import ru.kosad10.documentservice.api.model.DocumentsFilter;
 import ru.kosad10.documentservice.api.resource.DocumentsResource;
+import ru.kosad10.documentservice.api.service.DocumentsService;
 
 import java.util.Collection;
 
 @RestController
+@AllArgsConstructor
 public class DocumentsController implements DocumentsResource {
 
+    private final DocumentsService documentsService;
+
     @Override
-    public DocumentWithHistory getDocumentsWithHistory(Long documentId) {
+    public DocumentWithHistoryDTO getDocumentsWithHistory(Long documentId) {
         return null;
     }
 
