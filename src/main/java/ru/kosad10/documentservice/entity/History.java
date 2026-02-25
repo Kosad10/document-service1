@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocumentWithHistory {
+public class History {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
@@ -27,14 +27,16 @@ public class DocumentWithHistory {
     )
     @Column
     private Long id;
-    @Column
-    private Long documentId;
+
+    @ManyToOne
+    @JoinColumn
+    private Document document;
     @Column
     private String author;
     @Column
-    private LocalDate dateOfModify;
+    private LocalDate updatedAt;
     @Column
-    private Action actionEnum;
+    private Action action;
     @Column
     private String comment;
 }

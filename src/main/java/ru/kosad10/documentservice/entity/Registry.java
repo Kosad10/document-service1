@@ -11,21 +11,22 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatementRegister {
+public class Registry { //Registry
 
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "statement_register_seq"
+            generator = "registry_seq"
     )
     @SequenceGenerator(
-            name = "statement_register_seq",
-            sequenceName = "statement_register_id_seq",
+            name = "registry_seq",
+            sequenceName = "registry_id_seq",
             allocationSize = 1
     )
     @Column
     private Long id;
-    @Column
-    private Long document_id;
+    @OneToOne
+    @JoinColumn
+    private Document document;
 
 }

@@ -2,13 +2,16 @@ package ru.kosad10.documentservice.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CollectionId;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import ru.kosad10.documentservice.enums.Statuses;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -16,8 +19,8 @@ import java.util.UUID;
 @Setter
 @Table(name = "documents")
 @NoArgsConstructor
-@AllArgsConstructor
-public class Documents {
+
+public class Document {
 
     @Id
     @GeneratedValue(
@@ -29,16 +32,25 @@ public class Documents {
             sequenceName = "documents_id_seq",
             allocationSize = 1
     )
-    @Column
     private Long id;
-    @Column
-    private UUID uniqNumber;
-    @Column
+
+    private UUID uuid;
+
     private String author;
-    @Column
-    private String name;
-    @Column
-    private Statuses documentStatusEnum;
-    @Column
-    private LocalDate createdAddUpdatedAdd;
+
+    private String title;
+
+    private Statuses status;
+
+    @CreationTimestamp
+    private LocalDate createdAt;
+
+    @UpdateTimestamp
+    private LocalDate updatedAt;
+    @JoinColumn
+    @OneToMany
+    private List<History> history;
+    @JoinColumn
+    @OneToOne
+    private Registry registry;
 }
