@@ -1,8 +1,6 @@
 package ru.kosad10.documentservice.enums;
 
-//STATUS
-//
-public enum Statuses {
+public enum Status {
     DRAFT,
     SUBMITTED,
     APPROVED

@@ -5,10 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CollectionId;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.kosad10.documentservice.enums.Statuses;
+import org.hibernate.generator.EventType;
+import org.hibernate.type.SqlTypes;
+import ru.kosad10.documentservice.enums.Status;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,8 +42,9 @@ public class Document {
     private String author;
 
     private String title;
-
-    private Statuses status;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "status")
+    private Status status;
 
     @CreationTimestamp
     private LocalDate createdAt;
@@ -51,6 +55,6 @@ public class Document {
     @OneToMany
     private List<History> history;
     @JoinColumn
-    @OneToOne
+    @OneToOne(mappedBy = "document")
     private Registry registry;
 }
