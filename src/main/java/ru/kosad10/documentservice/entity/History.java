@@ -34,7 +34,7 @@ public class History {
     @Column
     private String author;
     @Column
-    private LocalDate updatedAt;
+    private LocalDate dateOfModify;
     @Column
     private Action action;
     @Column

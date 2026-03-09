@@ -31,6 +31,7 @@ public class DocumentsService {
     }
 
     public DocumentWithHistory getDocumentWithHistory(Long documentId) {
-        return null;
+        Document document = documentsRepository.findDocumentAndHistoryById(documentId);
+        return documentMapper.toDto(document);
     }
 }

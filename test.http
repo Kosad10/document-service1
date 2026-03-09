@@ -6,3 +6,7 @@ Content-Type: application/json
   "author": "kosad",
   "title": "ERT"
 }
+
+###
+GET localhost:8080/api/v1/document/10
+Content-Type: application/json
