@@ -10,6 +10,7 @@ import ru.kosad10.documentservice.api.model.DocumentWithHistory;
 import ru.kosad10.documentservice.api.model.DocumentWithStatusAndDate;
 import ru.kosad10.documentservice.api.model.DocumentsFilter;
 import ru.kosad10.documentservice.api.resource.DocumentsResource;
+import ru.kosad10.documentservice.mapper.DocumentMapper;
 import ru.kosad10.documentservice.service.DocumentsService;
 
 import java.util.Collection;
@@ -19,6 +20,7 @@ import java.util.Collection;
 public class DocumentsController implements DocumentsResource {
 
     private final DocumentsService documentsService;
+    private final DocumentMapper documentMapper;
 
     @Override
     public DocumentWithHistory getDocumentsWithHistory(Long documentId) {
@@ -26,8 +28,8 @@ public class DocumentsController implements DocumentsResource {
     }
 
     @Override
-    public Page<DocumentWithStatusAndDate> getDocumentsPackageById(Collection<Long> documentsId, Pageable pageable) {
-        return null;
+    public Page<DocumentWithHistory> getDocumentsPackageById(Collection<Long> documentsId, Pageable pageable) {
+        return documentsService.findDocuments(documentsId, pageable).map(documentMapper::toDto);
     }
 
     @Override

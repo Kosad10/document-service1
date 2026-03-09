@@ -2,6 +2,7 @@ package ru.kosad10.documentservice.api.resource;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import ru.kosad10.documentservice.api.model.CreateDocumentRequest;
 import ru.kosad10.documentservice.api.model.DocumentWithHistory;
@@ -16,12 +17,12 @@ public interface DocumentsResource {
     DocumentWithHistory getDocumentsWithHistory(@PathVariable Long documentId);
 
     @GetMapping("/api/v1/documents/package")
-    Page<DocumentWithStatusAndDate> getDocumentsPackageById(@RequestParam Collection<Long> documentsId,
+    Page<DocumentWithHistory> getDocumentsPackageById(@RequestParam Collection<Long> documentsId,
                                                     Pageable pageable);
 
     @GetMapping("api/v1/documents")
     Page<DocumentWithStatusAndDate> findDocuments(@RequestBody DocumentsFilter userFilter,
-                                    Pageable pageable);
+                                    @PageableDefault(size = 5, page = 2, sort = "id") Pageable pageable);
 
     @PostMapping("api/v1/document/")
     DocumentWithHistory createDocument(@RequestBody CreateDocumentRequest document);

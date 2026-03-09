@@ -1,6 +1,8 @@
 package ru.kosad10.documentservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.kosad10.documentservice.api.model.CreateDocumentRequest;
 import ru.kosad10.documentservice.api.model.DocumentWithHistory;
@@ -8,8 +10,8 @@ import ru.kosad10.documentservice.entity.Document;
 import ru.kosad10.documentservice.enums.Status;
 import ru.kosad10.documentservice.mapper.DocumentMapper;
 import ru.kosad10.documentservice.repository.DocumentsRepository;
-import ru.kosad10.documentservice.repository.HistoryRepository;
 
+import java.util.Collection;
 import java.util.UUID;
 
 
@@ -18,7 +20,6 @@ import java.util.UUID;
 public class DocumentsService {
 
     private final DocumentsRepository documentsRepository;
-    private final HistoryRepository historyRepository;
     private final DocumentMapper documentMapper;
 
     public DocumentWithHistory createDocument (CreateDocumentRequest createDocumentRequest){
@@ -33,5 +34,12 @@ public class DocumentsService {
     public DocumentWithHistory getDocumentWithHistory(Long documentId) {
         Document document = documentsRepository.findDocumentAndHistoryById(documentId);
         return documentMapper.toDto(document);
+    }
+
+    public Page<Document> findDocuments (Collection<Long> documentsId, Pageable pageable){
+        if (documentsId == null || documentsId.isEmpty()){
+            return Page.empty();
+        }
+        return documentsRepository.findByIdIn(documentsId, pageable);
     }
 }
