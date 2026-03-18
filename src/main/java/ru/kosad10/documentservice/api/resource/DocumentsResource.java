@@ -6,10 +6,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import ru.kosad10.documentservice.api.model.CreateDocumentRequest;
 import ru.kosad10.documentservice.api.model.DocumentWithHistory;
-import ru.kosad10.documentservice.api.model.DocumentWithStatusAndDate;
+import ru.kosad10.documentservice.api.model.DocumentWithResultStatus;
 import ru.kosad10.documentservice.api.model.DocumentsFilter;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface DocumentsResource {
 
@@ -21,18 +22,17 @@ public interface DocumentsResource {
                                                     Pageable pageable);
 
     @GetMapping("api/v1/documents")
-    Page<DocumentWithStatusAndDate> findDocuments(@RequestBody DocumentsFilter userFilter,
-                                    @PageableDefault(size = 5, page = 2, sort = "id") Pageable pageable);
+    Page<DocumentWithResultStatus> findDocuments(@RequestBody DocumentsFilter userFilter,
+                                                 @PageableDefault(size = 5, page = 2, sort = "id") Pageable pageable);
 
     @PostMapping("api/v1/document/")
     DocumentWithHistory createDocument(@RequestBody CreateDocumentRequest document);
 
     @PutMapping("api/v1/documents/{documentsId}")
-    Page<DocumentWithStatusAndDate> submitDocuments(@PathVariable Collection<Long> documentsId,
-                                                    Pageable pageable);
+    List<DocumentWithResultStatus> submitDocuments(@PathVariable Collection<Long> documentsId);
 
     @PutMapping("api/v1/documents/approval/{documentsId}")
-    Page<DocumentWithStatusAndDate> approvalDocuments(@PathVariable Collection<Long> documentsId,
-                                                      Pageable pageable);
+    Page<DocumentWithResultStatus> approvalDocuments(@PathVariable Collection<Long> documentsId,
+                                                     Pageable pageable);
 }
 
