@@ -32,7 +32,6 @@ public interface DocumentsResource {
     List<DocumentWithResultStatus> submitDocuments(@PathVariable Collection<Long> documentsId);
 
     @PutMapping("api/v1/documents/approval/{documentsId}")
-    Page<DocumentWithResultStatus> approvalDocuments(@PathVariable Collection<Long> documentsId,
-                                                     Pageable pageable);
+    List<DocumentWithResultStatus> approvalDocuments(@PathVariable Collection<Long> documentsId);
 }
 

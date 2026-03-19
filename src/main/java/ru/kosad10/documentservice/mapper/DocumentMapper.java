@@ -19,11 +19,13 @@ public interface DocumentMapper {
 
     default List<DocumentWithResultStatus> toDocumentsWithResultStatus(List<Document> success,
                                                                        List<Document> conflict,
+                                                                       List<Document> error,
                                                                        List<Long> notFound) {
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
 
         resultList.addAll(mapDocumentsToList(success, ResultStatus.SUCCESSFULLY));
         resultList.addAll(mapDocumentsToList(conflict, ResultStatus.CONFLICT));
+        resultList.addAll(mapDocumentsToList(error, ResultStatus.REGISTRATIONERROR));
         resultList.addAll(mapIdsToList(notFound));
         return resultList;
     }
@@ -32,9 +34,11 @@ public interface DocumentMapper {
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
         if (!(documents == null)|| !(documents.isEmpty())) {
             for (Document document : documents) {
-                DocumentWithResultStatus dwrs = new DocumentWithResultStatus(document.getId(), resultStatus);
-                resultList.add(dwrs);
+                DocumentWithResultStatus idWithResult = new DocumentWithResultStatus(document.getId(), resultStatus);
+                resultList.add(idWithResult);
             }
+        } else {
+            return Collections.emptyList();
         }
         return  resultList;
     }
@@ -45,8 +49,8 @@ public interface DocumentMapper {
             return Collections.emptyList();
         }
         for (Long id : ids) {
-            DocumentWithResultStatus dwrs = new DocumentWithResultStatus(id, ResultStatus.NOTFOUND);
-            resultList.add(dwrs);
+            DocumentWithResultStatus idWithResult = new DocumentWithResultStatus(id, ResultStatus.NOTFOUND);
+            resultList.add(idWithResult);
         }
         return resultList;
     }

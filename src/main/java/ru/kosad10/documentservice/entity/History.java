@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import ru.kosad10.documentservice.enums.Action;
 
 import java.time.LocalDate;
@@ -35,7 +37,8 @@ public class History {
     private String author;
     @Column
     private LocalDate dateOfModify;
-    @Column
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "actions")
     private Action action;
     @Column
     private String comment;

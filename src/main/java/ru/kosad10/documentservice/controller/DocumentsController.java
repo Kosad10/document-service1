@@ -10,7 +10,7 @@ import ru.kosad10.documentservice.api.model.DocumentWithResultStatus;
 import ru.kosad10.documentservice.api.model.DocumentsFilter;
 import ru.kosad10.documentservice.api.resource.DocumentsResource;
 import ru.kosad10.documentservice.mapper.DocumentMapper;
-import ru.kosad10.documentservice.service.DocumentsService;
+import ru.kosad10.documentservice.service.DocumentService;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentsController implements DocumentsResource {
 
-    private final DocumentsService documentsService;
+    private final DocumentService documentsService;
     private final DocumentMapper documentMapper;
 
     @Override
@@ -48,7 +48,7 @@ public class DocumentsController implements DocumentsResource {
     }
 
     @Override
-    public Page<DocumentWithResultStatus> approvalDocuments(Collection<Long> documentsId, Pageable pageable) {
-        return null;
+    public List<DocumentWithResultStatus> approvalDocuments(Collection<Long> documentsId) {
+        return documentsService.approveDocuments(documentsId);
     }
 }

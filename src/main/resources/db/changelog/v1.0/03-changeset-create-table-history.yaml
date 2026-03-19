@@ -17,7 +17,7 @@ databaseChangeLog:
                   name: document_id
                   type: BIGINT
                   constraints:
-                    unique: true
+                    unique: false
 
               - column:
                   name: author
