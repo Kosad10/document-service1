@@ -51,9 +51,10 @@ public class Document {
 
     @UpdateTimestamp
     private LocalDate updatedAt;
-    @JoinColumn
-    @OneToMany
+
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
     private List<History> history;
+
     @JoinColumn
     @OneToOne(mappedBy = "document")
     private Registry registry;

@@ -31,15 +31,19 @@ public class History {
     private Long id;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "document_id")
     private Document document;
+
     @Column
     private String author;
+
     @Column
     private LocalDate dateOfModify;
+
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(columnDefinition = "actions")
     private Action action;
+
     @Column
     private String comment;
 }

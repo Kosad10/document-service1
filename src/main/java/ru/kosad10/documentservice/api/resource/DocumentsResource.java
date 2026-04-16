@@ -28,9 +28,11 @@ public interface DocumentsResource {
     @PostMapping("api/v1/document/")
     DocumentWithHistory createDocument(@RequestBody CreateDocumentRequest document);
 
+    // добавить возможность оставить комментарии при отправлении на согласование документов
     @PutMapping("api/v1/documents/{documentsId}")
     List<DocumentWithResultStatus> submitDocuments(@PathVariable Collection<Long> documentsId);
 
+    // добавить возможность оставлять комментарии при утверждении документа
     @PutMapping("api/v1/documents/approval/{documentsId}")
     List<DocumentWithResultStatus> approvalDocuments(@PathVariable Collection<Long> documentsId);
 }

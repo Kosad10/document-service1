@@ -17,5 +17,6 @@ public record DocumentWithHistory(
         Status status,
         LocalDate createdAt,
         LocalDate updatedAt,
-        List<History> historyList) {
+        //тут должна быть дто
+        List<History> history) {
 }

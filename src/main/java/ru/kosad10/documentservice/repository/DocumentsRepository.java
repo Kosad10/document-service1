@@ -13,16 +13,17 @@ import ru.kosad10.documentservice.entity.Document;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DocumentsRepository extends JpaRepository <Document, Long>, JpaSpecificationExecutor<Document> {
 
-    @Query("SELECT d, h " +
-            "FROM Document d " +
-            "left join History h " +
-            "on d.id = h.document.id " +
-            "where d.id = :id")
-    Document findDocumentAndHistoryById(Long id);
+    @Query("""
+            SELECT d
+            FROM Document d
+            JOIN FETCH d.history h
+            where d.id = :id""")
+    Optional<Document> findDocumentAndHistoryById(Long id);
 
     Page<Document> findByIdIn(Collection<Long> ids, Pageable pageable);
 

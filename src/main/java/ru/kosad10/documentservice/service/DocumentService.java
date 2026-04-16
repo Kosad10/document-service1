@@ -10,13 +10,15 @@ import ru.kosad10.documentservice.api.model.DocumentWithHistory;
 import ru.kosad10.documentservice.api.model.DocumentWithResultStatus;
 import ru.kosad10.documentservice.entity.Document;
 import ru.kosad10.documentservice.entity.History;
+import ru.kosad10.documentservice.entity.Registry;
 import ru.kosad10.documentservice.enums.Action;
 import ru.kosad10.documentservice.enums.Status;
+import ru.kosad10.documentservice.exceptions.NotFoundException;
 import ru.kosad10.documentservice.mapper.DocumentMapper;
 import ru.kosad10.documentservice.repository.DocumentsRepository;
 import ru.kosad10.documentservice.repository.HistoryRepository;
+import ru.kosad10.documentservice.repository.RegistryRepository;
 
-import javax.print.Doc;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -28,8 +30,10 @@ public class DocumentService {
     private final DocumentsRepository documentsRepository;
     private final DocumentMapper documentMapper;
     private final HistoryRepository historyRepository;
+    private final RegistryRepository registryRepository;
 
     public DocumentWithHistory createDocument(CreateDocumentRequest createDocumentRequest) {
+        //в мапер
         Document document = new Document();
         document.setUuid(UUID.randomUUID());
         document.setAuthor(createDocumentRequest.author());
@@ -39,7 +43,8 @@ public class DocumentService {
     }
 
     public DocumentWithHistory getDocumentWithHistory(Long documentId) {
-        Document document = documentsRepository.findDocumentAndHistoryById(documentId);
+        Document document = documentsRepository.findDocumentAndHistoryById(documentId)
+                .orElseThrow(() -> new NotFoundException("Документ с id" + documentId + " не найден."));
         return documentMapper.toDto(document);
     }
 
@@ -53,7 +58,7 @@ public class DocumentService {
     @Transactional
     public List<DocumentWithResultStatus> submitDocuments(Collection<Long> documentsId) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(documentsId);
-        List<Document> conflict = findConflict(documents, Status.SUBMITTED, Status.APPROVED );
+        List<Document> conflict = findConflict(documents, Status.SUBMITTED, Status.APPROVED);
         List<Long> notFoundIds = collectNotFoundIds(documents, documentsId);
         List<Document> success = submitDraft(documents);
         return documentMapper.toDocumentsWithResultStatus(success, Collections.emptyList(), conflict, notFoundIds);
@@ -65,8 +70,7 @@ public class DocumentService {
             if ((document.getStatus()).equals(Status.DRAFT)) {
                 document.setStatus(Status.SUBMITTED);
                 successfullySubmit.add(document);
-                History history = new History(null, document, document.getAuthor(), LocalDate.now(), Action.SUBMIT, "");
-                historyRepository.save(history);
+                makeHistoryEntry(document, Action.SUBMIT);
             } else {
                 return Collections.emptyList();
             }
@@ -75,13 +79,24 @@ public class DocumentService {
     }
 
     @Transactional
-    public List<DocumentWithResultStatus> approveDocuments (Collection<Long> ids){
+    public List<DocumentWithResultStatus> approveDocuments(Collection<Long> ids) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(ids);
         List<Document> conflict = findConflict(documents, Status.APPROVED, Status.APPROVED);
         List<Long> notFoundIds = collectNotFoundIds(documents, ids);
         List<Document> error = errorApprove(documents);
         List<Document> approve = approveSubmittedDocuments(documents);
         return documentMapper.toDocumentsWithResultStatus(approve, conflict, error, notFoundIds);
+    }
+
+    private void makeHistoryEntry(Document document, Action action) {
+        History history = new History(null, document, document.getAuthor(), LocalDate.now(), action, "");
+        historyRepository.save(history);
+    }
+
+    private void makeRegistryEntry (Document document){
+        Registry registry = new Registry();
+        registry.setDocument(document);
+        registryRepository.save(registry);
     }
 
     private List<Document> findConflict(List<Document> documents, Status status, Status secondStatus) {
@@ -94,7 +109,7 @@ public class DocumentService {
         return conflictDraft;
     }
 
-    private List<Long> collectNotFoundIds (List<Document> documents, Collection<Long> documentsId) {
+    private List<Long> collectNotFoundIds(List<Document> documents, Collection<Long> documentsId) {
         Set<Long> inputIds = new HashSet<>(documentsId);
         List<Long> foundIds = new ArrayList<>();
         for (Document document : documents) {
@@ -104,31 +119,26 @@ public class DocumentService {
         return inputIds.stream().toList();
     }
 
-    private List<Document> errorApprove (List<Document> documents){
+    private List<Document> errorApprove(List<Document> documents) {
         List<Document> errorApprove = new ArrayList<>();
-        for(Document document : documents){
-            if(document.getStatus().equals(Status.DRAFT)){
+        for (Document document : documents) {
+            if (document.getStatus().equals(Status.DRAFT)) {
                 errorApprove.add(document);
             }
         }
         return errorApprove;
     }
 
-    private List<Document> approveSubmittedDocuments(List<Document> documents){
+    private List<Document> approveSubmittedDocuments(List<Document> documents) {
         List<Document> approvedDocuments = new ArrayList<>();
-        for(Document document : documents) {
-            if(document.getStatus().equals(Status.SUBMITTED)){
+        for (Document document : documents) {
+            if (document.getStatus().equals(Status.SUBMITTED)) {
                 document.setStatus(Status.APPROVED);
                 approvedDocuments.add(document);
-                History history = new History(null, document,
-                        document.getAuthor(),
-                        LocalDate.now(),
-                        Action.APPROVE, "");
-                historyRepository.save(history);
+                makeHistoryEntry(document, Action.APPROVE);
+                makeRegistryEntry(document); // какая должна быть ошибка, чтобы откатить согласование?
             }
         }
         return documentsRepository.saveAll(approvedDocuments);
-        // в случае согласования у нас конфликт, если документ уже согласован, тоесть если статус САБМИТ и АППРУВ
-        // в случае подтверждения, у нас конфликт только если документ уже аппрув
     }
 }
