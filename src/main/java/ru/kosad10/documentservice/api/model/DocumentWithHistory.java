@@ -18,5 +18,5 @@ public record DocumentWithHistory(
         LocalDate createdAt,
         LocalDate updatedAt,
         //тут должна быть дто
-        List<History> history) {
+        List<HistoryWithoutDocument> history) {
 }

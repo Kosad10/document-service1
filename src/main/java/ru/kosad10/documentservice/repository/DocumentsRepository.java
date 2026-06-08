@@ -3,6 +3,7 @@ package ru.kosad10.documentservice.repository;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -21,13 +22,21 @@ public interface DocumentsRepository extends JpaRepository <Document, Long>, Jpa
     @Query("""
             SELECT d
             FROM Document d
-            JOIN FETCH d.history h
+            LEFT JOIN FETCH d.history h
             where d.id = :id""")
     Optional<Document> findDocumentAndHistoryById(Long id);
 
+    @Query("""
+            SELECT d
+            FROM Document d
+            WHERE d.id IN :ids""")
     Page<Document> findByIdIn(Collection<Long> ids, Pageable pageable);
 
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT d FROM Document d WHERE d.id IN :ids")
+    @Query("""
+            SELECT d.id
+            FROM Document d
+            WHERE d.id IN :ids""")
     List<Document> findAllByIdWithWriteLock(@Param("ids") Collection<Long> ids);
 }

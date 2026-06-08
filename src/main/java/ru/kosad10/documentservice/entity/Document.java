@@ -52,7 +52,8 @@ public class Document {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_id")
+    @OneToMany
     private List<History> history;
 
     @JoinColumn

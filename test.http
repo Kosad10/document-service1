@@ -3,16 +3,16 @@ POST localhost:8080/api/v1/document/
 Content-Type: application/json
 
 {
-  "author": "kosad",
-  "title": "шестой док"
+  "author": "Anastasiia",
+  "title": "Documentic"
 }
 
 ###
-GET localhost:8080/api/v1/document/18
+GET localhost:8080/api/v1/document/20
 Content-Type: application/json
 
 ###
-GET localhost:8080/api/v1/documents/package?documentsId=10,12,13
+GET localhost:8080/api/v1/documents/package?documentsId=26,28
 Content-Type: application/json
 
 ###
@@ -22,3 +22,11 @@ Content-Type: application/json
 ###
 PUT localhost:8080/api/v1/documents/approval/18,19,20,21,22,23,24,25
 Content-Type: application/json
+
+###
+GET localhost:8080/api/v1/documents
+Content-Type: application/json
+
+{
+  "author": "kosad"
+}

@@ -3,11 +3,11 @@ package ru.kosad10.documentservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kosad10.documentservice.api.model.CreateDocumentRequest;
-import ru.kosad10.documentservice.api.model.DocumentWithHistory;
-import ru.kosad10.documentservice.api.model.DocumentWithResultStatus;
+import ru.kosad10.documentservice.api.model.*;
 import ru.kosad10.documentservice.entity.Document;
 import ru.kosad10.documentservice.entity.History;
 import ru.kosad10.documentservice.entity.Registry;
@@ -18,6 +18,7 @@ import ru.kosad10.documentservice.mapper.DocumentMapper;
 import ru.kosad10.documentservice.repository.DocumentsRepository;
 import ru.kosad10.documentservice.repository.HistoryRepository;
 import ru.kosad10.documentservice.repository.RegistryRepository;
+import ru.kosad10.documentservice.repository.specification.DocumentSpecification;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -33,26 +34,34 @@ public class DocumentService {
     private final RegistryRepository registryRepository;
 
     public DocumentWithHistory createDocument(CreateDocumentRequest createDocumentRequest) {
-        //в мапер
-        Document document = new Document();
-        document.setUuid(UUID.randomUUID());
-        document.setAuthor(createDocumentRequest.author());
-        document.setTitle(createDocumentRequest.title());
-        document.setStatus(Status.DRAFT);
-        return documentMapper.toDto(documentsRepository.save(document));
+        Document document = documentMapper.entityForSave(createDocumentRequest);
+        return documentMapper.toDtoDocument(documentsRepository.save(document));
     }
 
     public DocumentWithHistory getDocumentWithHistory(Long documentId) {
         Document document = documentsRepository.findDocumentAndHistoryById(documentId)
-                .orElseThrow(() -> new NotFoundException("Документ с id" + documentId + " не найден."));
-        return documentMapper.toDto(document);
+                .orElseThrow(() -> new NotFoundException("Документ с id: " + documentId + " не найден."));
+        return documentMapper.toDtoDocument(document);
     }
 
-    public Page<Document> findDocuments(Collection<Long> documentsId, Pageable pageable) {
+    public Page<DocumentWithoutHistory> getDocumentPackageById(Collection<Long> documentsId, Pageable pageable) {
         if (documentsId == null || documentsId.isEmpty()) {
             return Page.empty();
         }
-        return documentsRepository.findByIdIn(documentsId, pageable);
+        Page<Document> page = documentsRepository.findByIdIn(documentsId, pageable);
+
+        return page.map(documentMapper::toDtoWithoutHistory);
+    }
+
+    public Page<Document> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
+        Specification<Document> spec = DocumentSpecification.withFilters(
+                documentsFilter.documentStatusEnum(),
+                documentsFilter.author(),
+                documentsFilter.createdFrom(),
+                documentsFilter.createdTo()
+        );
+
+        return documentsRepository.findAll(spec, pageable);
     }
 
     @Transactional
@@ -93,7 +102,7 @@ public class DocumentService {
         historyRepository.save(history);
     }
 
-    private void makeRegistryEntry (Document document){
+    private void makeRegistryEntry(Document document) {
         Registry registry = new Registry();
         registry.setDocument(document);
         registryRepository.save(registry);
