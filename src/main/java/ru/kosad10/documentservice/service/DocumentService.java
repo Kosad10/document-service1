@@ -53,15 +53,15 @@ public class DocumentService {
         return page.map(documentMapper::toDtoWithoutHistory);
     }
 
-    public Page<Document> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<DocumentWithoutHistory> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
         Specification<Document> spec = DocumentSpecification.withFilters(
                 documentsFilter.documentStatusEnum(),
                 documentsFilter.author(),
                 documentsFilter.createdFrom(),
                 documentsFilter.createdTo()
         );
-
-        return documentsRepository.findAll(spec, pageable);
+        return documentsRepository.findAll(spec, pageable).map(documentMapper::toDtoWithoutHistory);
     }
 
     @Transactional

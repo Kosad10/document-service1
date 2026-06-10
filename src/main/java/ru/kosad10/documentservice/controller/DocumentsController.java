@@ -32,8 +32,8 @@ public class DocumentsController implements DocumentsResource {
     }
 
     @Override
-    public Page<Document> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
-        return documentMapper.toDtoWithoutHistory(documentsService.findDocuments(documentsFilter, pageable));
+    public Page<DocumentWithoutHistory> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
+        return documentsService.findDocuments(documentsFilter, pageable);
     }
 
     @Override

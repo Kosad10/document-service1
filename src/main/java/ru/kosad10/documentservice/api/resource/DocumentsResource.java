@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.*;
 import ru.kosad10.documentservice.api.model.*;
+import ru.kosad10.documentservice.entity.Document;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,8 +21,8 @@ public interface DocumentsResource {
                                                     Pageable pageable);
 
     @GetMapping("api/v1/documents")
-    PagedModel<DocumentWithoutHistory> findDocuments(@RequestBody DocumentsFilter documentsFilter,
-                                                     @PageableDefault(size = 5, page = 2, sort = "id") Pageable pageable);
+    Page<DocumentWithoutHistory> findDocuments(@RequestBody DocumentsFilter documentsFilter,
+                                 @PageableDefault(size = 5, page = 0, sort = "id") Pageable pageable);
 
     @PostMapping("api/v1/document/")
     DocumentWithHistory createDocument(@RequestBody CreateDocumentRequest document);

@@ -3,7 +3,6 @@ package ru.kosad10.documentservice.repository;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -35,7 +34,7 @@ public interface DocumentsRepository extends JpaRepository <Document, Long>, Jpa
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-            SELECT d.id
+            SELECT d
             FROM Document d
             WHERE d.id IN :ids""")
     List<Document> findAllByIdWithWriteLock(@Param("ids") Collection<Long> ids);
