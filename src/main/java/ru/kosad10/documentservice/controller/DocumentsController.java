@@ -27,8 +27,8 @@ public class DocumentsController implements DocumentsResource {
     }
 
     @Override
-    public Page<DocumentWithoutHistory> getDocumentsPackageById(Collection<Long> documentsId, Pageable pageable) {
-        return documentsService.getDocumentPackageById(documentsId, pageable);
+    public Page<DocumentWithoutHistory> getDocumentsPackageById(Collection<Long> documentIds, Pageable pageable) {
+        return documentsService.getDocumentPackageById(documentIds, pageable);
     }
 
     @Override

@@ -25,8 +25,7 @@ public class Registry { //Registry
     )
     @Column
     private Long id;
-    @OneToOne
-    @JoinColumn
-    private Document document;
 
+    @Column
+    private Long documentId;
 }

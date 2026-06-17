@@ -4,5 +4,5 @@ public enum ResultStatus {
     SUCCESSFULLY,
     CONFLICT,
     NOTFOUND,
-    REGISTRATIONERROR
+    REGISTRATION_ERROR
 }

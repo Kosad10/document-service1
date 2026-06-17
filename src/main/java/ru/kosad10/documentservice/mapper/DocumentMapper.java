@@ -33,14 +33,17 @@ public interface DocumentMapper {
                                                                        List<Long> notFound) {
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
 
+        //переписать на один метод все 4
         resultList.addAll(mapDocumentsToList(success, ResultStatus.SUCCESSFULLY));
         resultList.addAll(mapDocumentsToList(conflict, ResultStatus.CONFLICT));
-        resultList.addAll(mapDocumentsToList(error, ResultStatus.REGISTRATIONERROR));
+        resultList.addAll(mapDocumentsToList(error, ResultStatus.REGISTRATION_ERROR));
         resultList.addAll(mapIdsToList(notFound));
         return resultList;
     }
 
     private List<DocumentWithResultStatus> mapDocumentsToList(List<Document> documents, ResultStatus resultStatus) {
+        //Перепиши на StreamApi попроще
+
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
         if (!(documents == null)|| !(documents.isEmpty())) {
             for (Document document : documents) {

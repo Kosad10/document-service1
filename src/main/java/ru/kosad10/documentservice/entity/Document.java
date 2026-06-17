@@ -55,8 +55,4 @@ public class Document {
     @JoinColumn(name = "document_id")
     @OneToMany
     private List<History> history;
-
-    @JoinColumn
-    @OneToOne(mappedBy = "document")
-    private Registry registry;
 }

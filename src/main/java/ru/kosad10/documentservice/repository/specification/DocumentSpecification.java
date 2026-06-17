@@ -2,6 +2,7 @@ package ru.kosad10.documentservice.repository.specification;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import ru.kosad10.documentservice.api.model.DocumentsFilter;
 import ru.kosad10.documentservice.entity.Document;
 import ru.kosad10.documentservice.enums.Status;
 
@@ -10,6 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DocumentSpecification {
+
+    public static Specification<Document> withFilters(DocumentsFilter documentsFilter) {
+        return Specification.<Document>unrestricted()
+                .and(hasStatus(documentsFilter.documentStatusEnum()))
+                .and(hasAuthor(documentsFilter.author()))
+                .and(createdBetween(documentsFilter.createdFrom(), documentsFilter.createdTo()));
+    }
 
     public static Specification<Document> hasAuthor(String author) {
         return (root, query, criteriaBuilder) -> {
@@ -45,13 +53,5 @@ public class DocumentSpecification {
             }
             return criteriaBuilder.equal(root.get("status"), status);
         };
-    }
-
-    public static Specification<Document> withFilters(Status status, String author,
-                                                      LocalDate dateFrom, LocalDate dateTo) {
-        return Specification.<Document>unrestricted()
-                .and(hasStatus(status))
-                .and(hasAuthor(author))
-                .and(createdBetween(dateFrom, dateTo));
     }
 }

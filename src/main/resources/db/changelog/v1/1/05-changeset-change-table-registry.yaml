@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: change_column_document_id
+      author: kosolapova A.
+
+      changes:
+        - addUniqueConstraint:
+            tableName: registry
+            columnNames: document_id
+        - dropForeignKeyConstraint:
+            baseTableName: registry
+            constraintName: fk_documents_registry
+
+
