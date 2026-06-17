@@ -20,14 +20,14 @@ Content-Type: application/json
 
 {
   "author": "Anastasiia",
-  "title": "New Document"
+  "title": "New Document3"
 }
 
 ###
-PUT localhost:8080/api/v1/documents/21,26,28
+PUT localhost:8080/api/v1/documents/1,2,10
 Content-Type: application/json
 
 ###
-PUT localhost:8080/api/v1/documents/approval/21,26,28
+PUT localhost:8080/api/v1/documents/approval/1,2,7
 Content-Type: application/json
 

@@ -65,12 +65,12 @@ public class DocumentService {
     @Transactional
     public List<DocumentWithResultStatus> submitDocuments(Collection<Long> documentsId) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(documentsId);
-
-        List<Document> conflict = findConflict(documents, Set.of(Status.APPROVED));
+        Set<Status> invalidStatuses = Set.of(Status.SUBMITTED, Status.APPROVED);
+        List<Document> conflict = findConflict(documents, invalidStatuses);
         List<Long> notFoundIds = collectNotFoundIds(documents, documentsId);
         List<Document> success = submitDraft(documents);
 
-        return documentMapper.toDocumentsWithResultStatus(success, Collections.emptyList(), conflict, notFoundIds);
+        return documentMapper.toDocumentsWithResultStatus(success, conflict, Collections.emptyList(), notFoundIds);
     }
 
     private List<Document> submitDraft(List<Document> documents) {
@@ -93,7 +93,8 @@ public class DocumentService {
     @Transactional
     public List<DocumentWithResultStatus> approveDocuments(Collection<Long> ids) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(ids);
-        List<Document> conflict = findConflict(documents, Set.of(Status.APPROVED));
+        Set<Status> invalidStatuses = Set.of(Status.APPROVED);
+        List<Document> conflict = findConflict(documents, invalidStatuses);
         List<Long> notFoundIds = collectNotFoundIds(documents, ids);
         List<Document> error = errorApprove(documents);
         List<Document> approve = approveSubmittedDocuments(documents);
@@ -102,40 +103,25 @@ public class DocumentService {
 
 
     private List<Document> findConflict(List<Document> documents, Set<Status> invalidStatuses) {
-        List<Document> conflictDraft = new ArrayList<>();
-        for (Document document : documents) {
-            //переписать на сет
-        }
-        return conflictDraft;
+        return documents.stream()
+                .filter(i -> invalidStatuses.contains(i.getStatus()))
+                .toList();
     }
 
-    private List<Long> collectNotFoundIds(List<Document> documents, Collection<Long> requestedIs) {
+    private List<Long> collectNotFoundIds(List<Document> documents, Collection<Long> requestedIds) {
         Set<Long> foundIds = documents.stream()
                 .map(Document::getId)
                 .collect(Collectors.toSet());
 
-        return requestedIs.stream()
+        return requestedIds.stream()
                 .filter(i -> !foundIds.contains(i))
                 .toList();
-//        Set<Long> inputIds = new HashSet<>(documentsId);
-//
-//        List<Long> foundIds = new ArrayList<>();
-//        for (Document document : documents) {
-//            foundIds.add(document.getId());
-//        }
-//
-//        inputIds.removeAll(foundIds);
-//        return inputIds.stream().toList();
     }
 
     private List<Document> errorApprove(List<Document> documents) {
-        List<Document> errorApprove = new ArrayList<>();
-        for (Document document : documents) {
-            if (document.getStatus().equals(Status.DRAFT)) {
-                errorApprove.add(document);
-            }
-        }
-        return errorApprove;
+        return documents.stream()
+                .filter(i -> i.getStatus().equals(Status.DRAFT))
+                .toList();
     }
 
     private List<Document> approveSubmittedDocuments(List<Document> documents) {
@@ -151,11 +137,8 @@ public class DocumentService {
     }
 
     private boolean makeRegistryEntry(Document document) {
-        //Сделать в таблице реестра ограничение 1 документ id можно зарегестрировать 1 раз
-        //Если запись в реестр создать не удалось, утверждение документа должно быть
-        //отменено.
         if (registryRepository.existsRegistryByDocumentId(document.getId())) {
-           return false;
+            return false;
         }
 
         Registry registry = new Registry();
