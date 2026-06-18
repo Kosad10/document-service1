@@ -27,44 +27,25 @@ public interface DocumentMapper {
 
     Document toEntity(DocumentWithHistory documentWithHistory);
 
-    default List<DocumentWithResultStatus> toDocumentsWithResultStatus(List<Document> success,
-                                                                       List<Document> conflict,
-                                                                       List<Document> error,
+    default List<DocumentWithResultStatus> toDocumentsWithResultStatus(List<Long> success,
+                                                                       List<Long> conflict,
+                                                                       List<Long> error,
                                                                        List<Long> notFound) {
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
 
-        //переписать на один метод все 4
         resultList.addAll(mapDocumentsToList(success, ResultStatus.SUCCESSFULLY));
         resultList.addAll(mapDocumentsToList(conflict, ResultStatus.CONFLICT));
         resultList.addAll(mapDocumentsToList(error, ResultStatus.REGISTRATION_ERROR));
-        resultList.addAll(mapIdsToList(notFound));
+        resultList.addAll(mapDocumentsToList(notFound, ResultStatus.NOTFOUND));
         return resultList;
     }
 
-    private List<DocumentWithResultStatus> mapDocumentsToList(List<Document> documents, ResultStatus resultStatus) {
-        //Перепиши на StreamApi попроще
+    private List<DocumentWithResultStatus> mapDocumentsToList(List<Long> documentsIds, ResultStatus resultStatus) {
 
-        List<DocumentWithResultStatus> resultList = new ArrayList<>();
-        if (!(documents == null)|| !(documents.isEmpty())) {
-            for (Document document : documents) {
-                DocumentWithResultStatus idWithResult = new DocumentWithResultStatus(document.getId(), resultStatus);
-                resultList.add(idWithResult);
-            }
-        } else {
-            return Collections.emptyList();
-        }
-        return  resultList;
-    }
-
-    private List<DocumentWithResultStatus> mapIdsToList(List<Long> ids) {
-        List<DocumentWithResultStatus> resultList = new ArrayList<>();
-        if (ids == null || ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-        for (Long id : ids) {
-            DocumentWithResultStatus idWithResult = new DocumentWithResultStatus(id, ResultStatus.NOTFOUND);
-            resultList.add(idWithResult);
-        }
-        return resultList;
+        return documentsIds.stream()
+                .map(doc -> {
+                    return new DocumentWithResultStatus(doc, resultStatus);
+                })
+                .toList();
     }
 }

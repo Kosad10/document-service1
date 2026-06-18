@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.hibernate5.HibernateJdbcException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kosad10.documentservice.api.model.*;
@@ -40,11 +39,13 @@ public class DocumentService {
         return documentMapper.toDtoDocument(documentsRepository.save(document));
     }
 
+
     public DocumentWithHistory getDocumentWithHistory(Long documentId) {
         Document document = documentsRepository.findDocumentAndHistoryById(documentId)
                 .orElseThrow(() -> new NotFoundException("Документ с id: " + documentId + " не найден."));
         return documentMapper.toDtoDocument(document);
     }
+
 
     public Page<DocumentWithoutHistory> getDocumentPackageById(Collection<Long> documentsId, Pageable pageable) {
         if (documentsId == null || documentsId.isEmpty()) {
@@ -55,6 +56,7 @@ public class DocumentService {
         return page.map(documentMapper::toDtoWithoutHistory);
     }
 
+
     @Transactional(readOnly = true)
     public Page<DocumentWithoutHistory> findDocuments(DocumentsFilter documentsFilter, Pageable pageable) {
         Specification<Document> spec = DocumentSpecification.withFilters(documentsFilter);
@@ -62,49 +64,46 @@ public class DocumentService {
                 .map(documentMapper::toDtoWithoutHistory);
     }
 
+
     @Transactional
     public List<DocumentWithResultStatus> submitDocuments(Collection<Long> documentsId) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(documentsId);
         Set<Status> invalidStatuses = Set.of(Status.SUBMITTED, Status.APPROVED);
-        List<Document> conflict = findConflict(documents, invalidStatuses);
+        List<Long> conflict = findConflict(documents, invalidStatuses);
         List<Long> notFoundIds = collectNotFoundIds(documents, documentsId);
-        List<Document> success = submitDraft(documents);
+        List<Long> success = submitDraft(documents);
 
         return documentMapper.toDocumentsWithResultStatus(success, conflict, Collections.emptyList(), notFoundIds);
     }
 
-    private List<Document> submitDraft(List<Document> documents) {
-        List<Document> successfullySubmit = new ArrayList<>();
+    private List<Long> submitDraft(List<Document> documents) {
+        List<Document> documentsForSave = documents.stream()
+                .filter(i -> Status.DRAFT.equals(i.getStatus()))
+                .peek(document -> document.setStatus(Status.SUBMITTED))
+                .peek(document -> {
+                    historyRepository.save(historyMapper.toDocumentHistory(document, Action.SUBMIT));
+                })
+                .toList();
 
-        for (Document document : documents) {
-
-            if ((document.getStatus()).equals(Status.DRAFT)) {
-                document.setStatus(Status.SUBMITTED);
-                successfullySubmit.add(document);
-                historyRepository.save(historyMapper.toDocumentHistory(document, Action.SUBMIT));
-            } else {
-                return Collections.emptyList();
-            }
-
-        }
-        return documentsRepository.saveAll(successfullySubmit);
+        return documentsRepository.saveAll(documentsForSave).stream().map(Document::getId).toList();
     }
 
     @Transactional
     public List<DocumentWithResultStatus> approveDocuments(Collection<Long> ids) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(ids);
         Set<Status> invalidStatuses = Set.of(Status.APPROVED);
-        List<Document> conflict = findConflict(documents, invalidStatuses);
+        List<Long> conflict = findConflict(documents, invalidStatuses);
         List<Long> notFoundIds = collectNotFoundIds(documents, ids);
-        List<Document> error = errorApprove(documents);
-        List<Document> approve = approveSubmittedDocuments(documents);
+        List<Long> error = errorApprove(documents);
+        List<Long> approve = approveSubmittedDocuments(documents);
         return documentMapper.toDocumentsWithResultStatus(approve, conflict, error, notFoundIds);
     }
 
 
-    private List<Document> findConflict(List<Document> documents, Set<Status> invalidStatuses) {
+    private List<Long> findConflict(List<Document> documents, Set<Status> invalidStatuses) {
         return documents.stream()
                 .filter(i -> invalidStatuses.contains(i.getStatus()))
+                .map(Document::getId)
                 .toList();
     }
 
@@ -118,22 +117,24 @@ public class DocumentService {
                 .toList();
     }
 
-    private List<Document> errorApprove(List<Document> documents) {
+    private List<Long> errorApprove(List<Document> documents) {
         return documents.stream()
                 .filter(i -> i.getStatus().equals(Status.DRAFT))
+                .map(Document::getId)
                 .toList();
     }
 
-    private List<Document> approveSubmittedDocuments(List<Document> documents) {
-        List<Document> approvedDocuments = new ArrayList<>();
-        for (Document document : documents) {
-            if (document.getStatus().equals(Status.SUBMITTED) && makeRegistryEntry(document)) {
-                document.setStatus(Status.APPROVED);
-                approvedDocuments.add(document);
-                historyRepository.save(historyMapper.toDocumentHistory(document, Action.APPROVE));
-            }
-        }
-        return documentsRepository.saveAll(approvedDocuments);
+    private List<Long> approveSubmittedDocuments(List<Document> documents) {
+
+        List<Document> approvedDocuments = documents.stream()
+                .filter(i -> Status.SUBMITTED.equals(i.getStatus()))
+                .peek(i -> i.setStatus(Status.APPROVED))
+                .peek(i -> {
+                    historyRepository.save(historyMapper.toDocumentHistory(i, Action.APPROVE));
+                })
+                .toList();
+
+        return documentsRepository.saveAll(approvedDocuments).stream().map(Document::getId).toList();
     }
 
     private boolean makeRegistryEntry(Document document) {
