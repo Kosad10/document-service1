@@ -10,6 +10,7 @@ import ru.kosad10.documentservice.enums.ResultStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface DocumentMapper {
@@ -27,25 +28,21 @@ public interface DocumentMapper {
 
     Document toEntity(DocumentWithHistory documentWithHistory);
 
-    default List<DocumentWithResultStatus> toDocumentsWithResultStatus(List<Long> success,
-                                                                       List<Long> conflict,
-                                                                       List<Long> error,
-                                                                       List<Long> notFound) {
+    default List<DocumentWithResultStatus> toDocumentsWithResultStatus(
+            Map<ResultStatus, List<Long>> idsWithResultStatus) {
+
         List<DocumentWithResultStatus> resultList = new ArrayList<>();
 
-        resultList.addAll(mapDocumentsToList(success, ResultStatus.SUCCESSFULLY));
-        resultList.addAll(mapDocumentsToList(conflict, ResultStatus.CONFLICT));
-        resultList.addAll(mapDocumentsToList(error, ResultStatus.REGISTRATION_ERROR));
-        resultList.addAll(mapDocumentsToList(notFound, ResultStatus.NOTFOUND));
+        for (Map.Entry<ResultStatus, List<Long>> entry : idsWithResultStatus.entrySet()) {
+
+            ResultStatus resultStatus = entry.getKey();
+            List<Long> ids = entry.getValue();
+
+            for (Long id : ids) {
+                resultList.add(new DocumentWithResultStatus(id, resultStatus));
+            }
+
+        }
         return resultList;
-    }
-
-    private List<DocumentWithResultStatus> mapDocumentsToList(List<Long> documentsIds, ResultStatus resultStatus) {
-
-        return documentsIds.stream()
-                .map(doc -> {
-                    return new DocumentWithResultStatus(doc, resultStatus);
-                })
-                .toList();
     }
 }

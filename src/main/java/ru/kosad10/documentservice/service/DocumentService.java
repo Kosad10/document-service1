@@ -10,6 +10,7 @@ import ru.kosad10.documentservice.api.model.*;
 import ru.kosad10.documentservice.entity.Document;
 import ru.kosad10.documentservice.entity.Registry;
 import ru.kosad10.documentservice.enums.Action;
+import ru.kosad10.documentservice.enums.ResultStatus;
 import ru.kosad10.documentservice.enums.Status;
 import ru.kosad10.documentservice.exceptions.NotFoundException;
 import ru.kosad10.documentservice.mapper.DocumentMapper;
@@ -69,11 +70,12 @@ public class DocumentService {
     public List<DocumentWithResultStatus> submitDocuments(Collection<Long> documentsId) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(documentsId);
         Set<Status> invalidStatuses = Set.of(Status.SUBMITTED, Status.APPROVED);
-        List<Long> conflict = findConflict(documents, invalidStatuses);
-        List<Long> notFoundIds = collectNotFoundIds(documents, documentsId);
-        List<Long> success = submitDraft(documents);
+        Map<ResultStatus, List<Long>> forMap = new HashMap<>();
+        forMap.put(ResultStatus.CONFLICT, findConflict(documents, invalidStatuses));
+        forMap.put(ResultStatus.NOTFOUND, collectNotFoundIds(documents, documentsId));
+        forMap.put(ResultStatus.SUCCESSFULLY, submitDraft(documents));
 
-        return documentMapper.toDocumentsWithResultStatus(success, conflict, Collections.emptyList(), notFoundIds);
+        return documentMapper.toDocumentsWithResultStatus(forMap);
     }
 
     private List<Long> submitDraft(List<Document> documents) {
@@ -92,11 +94,12 @@ public class DocumentService {
     public List<DocumentWithResultStatus> approveDocuments(Collection<Long> ids) {
         List<Document> documents = documentsRepository.findAllByIdWithWriteLock(ids);
         Set<Status> invalidStatuses = Set.of(Status.APPROVED);
-        List<Long> conflict = findConflict(documents, invalidStatuses);
-        List<Long> notFoundIds = collectNotFoundIds(documents, ids);
-        List<Long> error = errorApprove(documents);
-        List<Long> approve = approveSubmittedDocuments(documents);
-        return documentMapper.toDocumentsWithResultStatus(approve, conflict, error, notFoundIds);
+        Map<ResultStatus, List<Long>> forMap = new HashMap<>();
+        forMap.put(ResultStatus.CONFLICT, findConflict(documents, invalidStatuses));
+        forMap.put(ResultStatus.NOTFOUND, collectNotFoundIds(documents, ids));
+        forMap.put(ResultStatus.REGISTRATION_ERROR, errorApprove(documents)) ;
+        forMap.put(ResultStatus.SUCCESSFULLY, approveSubmittedDocuments(documents));
+        return documentMapper.toDocumentsWithResultStatus(forMap);
     }
 
 
